@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+
 import {
   ChevronDown,
   ChevronUp,
@@ -23,21 +24,37 @@ import {
 import { useLanguage } from "../../context/LanguageContext";
 
 export default function Navbar() {
+  // =========================================================
+  // NAVIGATION STATE
+  // =========================================================
+
   const [activeMenu, setActiveMenu] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
 
   // =========================================================
-  // CART COUNT
+  // CART STATE
   // =========================================================
 
   const [cartCount, setCartCount] = useState(0);
 
+  // =========================================================
+  // REFS
+  // =========================================================
+
   const headerRef = useRef(null);
   const mainNavRef = useRef(null);
 
+  // =========================================================
+  // ROUTER
+  // =========================================================
+
   const location = useLocation();
+
+  // =========================================================
+  // LANGUAGE
+  // =========================================================
 
   const {
     language,
@@ -54,7 +71,8 @@ export default function Navbar() {
 
   const updateCartCount = () => {
     try {
-      const savedCart = localStorage.getItem("voltnova_cart");
+      const savedCart =
+        localStorage.getItem("voltnova_cart");
 
       if (!savedCart) {
         setCartCount(0);
@@ -69,13 +87,18 @@ export default function Navbar() {
       }
 
       const total = cart.reduce(
-        (sum, item) => sum + (Number(item.quantity) || 1),
+        (sum, item) =>
+          sum + (Number(item.quantity) || 1),
         0,
       );
 
       setCartCount(total);
     } catch (error) {
-      console.error("Failed to update cart count:", error);
+      console.error(
+        "Failed to update cart count:",
+        error,
+      );
+
       setCartCount(0);
     }
   };
@@ -89,10 +112,16 @@ export default function Navbar() {
     updateCartCount();
 
     // Same-tab cart updates
-    window.addEventListener("cartUpdated", updateCartCount);
+    window.addEventListener(
+      "cartUpdated",
+      updateCartCount,
+    );
 
     // Other-tab cart updates
-    window.addEventListener("storage", updateCartCount);
+    window.addEventListener(
+      "storage",
+      updateCartCount,
+    );
 
     return () => {
       window.removeEventListener(
@@ -107,9 +136,9 @@ export default function Navbar() {
     };
   }, []);
 
-  /* =========================================================
-     CLOSE MENUS ON ROUTE CHANGE
-  ========================================================= */
+  // =========================================================
+  // CLOSE MENUS ON ROUTE CHANGE
+  // =========================================================
 
   useEffect(() => {
     setActiveMenu(null);
@@ -117,25 +146,34 @@ export default function Navbar() {
     setLanguageOpen(false);
   }, [location.pathname]);
 
-  /* =========================================================
-     DETECT SCROLL
-  ========================================================= */
+  // =========================================================
+  // DETECT SCROLL
+  // =========================================================
 
   useEffect(() => {
     const handleScroll = () => {
       const triggerPoint =
         window.innerWidth >= 1024 ? 33 : 0;
 
-      setIsScrolled(window.scrollY > triggerPoint);
+      setIsScrolled(
+        window.scrollY > triggerPoint,
+      );
     };
 
     handleScroll();
 
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
+    window.addEventListener(
+      "scroll",
+      handleScroll,
+      {
+        passive: true,
+      },
+    );
 
-    window.addEventListener("resize", handleScroll);
+    window.addEventListener(
+      "resize",
+      handleScroll,
+    );
 
     return () => {
       window.removeEventListener(
@@ -150,9 +188,9 @@ export default function Navbar() {
     };
   }, []);
 
-  /* =========================================================
-     LOCK BODY SCROLL
-  ========================================================= */
+  // =========================================================
+  // LOCK BODY SCROLL WHEN MOBILE MENU IS OPEN
+  // =========================================================
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen
@@ -164,9 +202,9 @@ export default function Navbar() {
     };
   }, [mobileOpen]);
 
-  /* =========================================================
-     ESCAPE + OUTSIDE CLICK
-  ========================================================= */
+  // =========================================================
+  // ESCAPE + OUTSIDE CLICK
+  // =========================================================
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -210,6 +248,10 @@ export default function Navbar() {
     };
   }, []);
 
+  // =========================================================
+  // RENDER
+  // =========================================================
+
   return (
     <header
       ref={headerRef}
@@ -234,7 +276,7 @@ export default function Navbar() {
       </div>
 
       {/* =====================================================
-          MAIN NAVBAR PLACEHOLDER
+          NAVBAR PLACEHOLDER WHEN SCROLLED
       ====================================================== */}
 
       {isScrolled && (
@@ -251,7 +293,11 @@ export default function Navbar() {
       <div
         ref={mainNavRef}
         className={`
-          ${isScrolled ? "fixed left-0 top-0" : "relative"}
+          ${
+            isScrolled
+              ? "fixed left-0 top-0"
+              : "relative"
+          }
           z-[9999]
           w-full
           border-b
@@ -267,6 +313,10 @@ export default function Navbar() {
           }
         `}
       >
+        {/* ===================================================
+            NAV INNER
+        ==================================================== */}
+
         <div className="px-[30px] sm:px-[30px]">
           <div className="flex h-[76px] items-center justify-between gap-4">
 
@@ -277,7 +327,9 @@ export default function Navbar() {
             <Link
               to="/"
               className="flex shrink-0 items-center"
-              aria-label={t("EKACEL Energy home")}
+              aria-label={t(
+                "EKACEL Energy home",
+              )}
             >
               <img
                 src="/images/logo.png"
@@ -291,23 +343,42 @@ export default function Navbar() {
             ================================================== */}
 
             <nav
-              className="relative hidden h-full items-center lg:flex"
+              className="
+                relative
+                hidden
+                h-full
+                items-center
+                lg:flex
+              "
               onMouseLeave={() =>
                 setActiveMenu(null)
               }
             >
+              {/* ===============================================
+                  PRIMARY NAVIGATION
+              ================================================ */}
+
               {primaryNav.map((menu) => (
                 <div
                   key={menu.key}
-                  className="relative flex h-full items-center"
+                  className="
+                    relative
+                    flex
+                    h-full
+                    items-center
+                  "
                 >
                   <Link
                     to={menu.href}
                     onMouseEnter={() =>
-                      setActiveMenu(menu.key)
+                      setActiveMenu(
+                        menu.key,
+                      )
                     }
                     onFocus={() =>
-                      setActiveMenu(menu.key)
+                      setActiveMenu(
+                        menu.key,
+                      )
                     }
                     className={`
                       flex
@@ -322,7 +393,8 @@ export default function Navbar() {
                       tracking-[-0.01em]
                       transition-colors
                       ${
-                        activeMenu === menu.key
+                        activeMenu ===
+                        menu.key
                           ? "bg-slate-surface text-teal-light"
                           : "text-navy hover:text-teal-light"
                       }
@@ -337,7 +409,8 @@ export default function Navbar() {
                         transition-transform
                         duration-200
                         ${
-                          activeMenu === menu.key
+                          activeMenu ===
+                          menu.key
                             ? "rotate-180"
                             : ""
                         }
@@ -345,41 +418,48 @@ export default function Navbar() {
                     />
                   </Link>
 
-                  {activeMenu === menu.key && (
+                  {/* DESKTOP DROPDOWN */}
+
+                  {activeMenu ===
+                    menu.key && (
                     <DesktopDropdown
                       items={menu.items}
                       onNavigate={() =>
-                        setActiveMenu(null)
+                        setActiveMenu(
+                          null,
+                        )
                       }
                     />
                   )}
                 </div>
               ))}
 
-              {/* =================================================
+              {/* ===============================================
                   SECONDARY NAVIGATION
-              ================================================== */}
+              ================================================ */}
 
-              {secondaryNav.map((link) => (
-                <Link
-                  key={link.key}
-                  to={link.href}
-                  className="
-                    rounded-full
-                    px-4
-                    py-2.5
-                    text-[0.92rem]
-                    font-semibold
-                    leading-none
-                    tracking-[-0.01em]
-                    text-navy
-                    transition-colors
-                    hover:text-teal-light
-                  "
-                >
-                  {tn(link.label)}
-                </Link>
-              ))}
+              {secondaryNav.map(
+                (link) => (
+                  <Link
+                    key={link.key}
+                    to={link.href}
+                    className="
+                      rounded-full
+                      px-4
+                      py-2.5
+                      text-[0.92rem]
+                      font-semibold
+                      leading-none
+                      tracking-[-0.01em]
+                      text-navy
+                      transition-colors
+                      hover:text-teal-light
+                    "
+                  >
+                    {tn(link.label)}
+                  </Link>
+                ),
+              )}
             </nav>
 
             {/* =================================================
@@ -388,14 +468,16 @@ export default function Navbar() {
 
             <div className="flex shrink-0 items-center gap-2.5">
 
-              {/* =================================================
-                  CART ICON
-              ================================================== */}
+              {/* ===============================================
+                  DESKTOP CART
+              ================================================ */}
 
               <Link
                 to="/cart"
                 title={t("nav.cart")}
-                aria-label={`${t("nav.cart")} (${cartCount})`}
+                aria-label={`${t(
+                  "nav.cart",
+                )} (${cartCount})`}
                 className="
                   group
                   relative
@@ -430,9 +512,7 @@ export default function Navbar() {
                   strokeWidth={2}
                 />
 
-                {/* =================================================
-                    CART BADGE
-                ================================================== */}
+                {/* CART BADGE */}
 
                 {cartCount > 0 && (
                   <span
@@ -464,9 +544,9 @@ export default function Navbar() {
                 )}
               </Link>
 
-              {/* =================================================
+              {/* ===============================================
                   LANGUAGE SELECTOR
-              ================================================== */}
+              ================================================ */}
 
               <div className="relative hidden lg:block">
                 <button
@@ -498,7 +578,9 @@ export default function Navbar() {
                     hover:text-teal-700
                     hover:shadow-md
                   "
-                  aria-expanded={languageOpen}
+                  aria-expanded={
+                    languageOpen
+                  }
                   aria-haspopup="menu"
                 >
                   <Globe2
@@ -520,20 +602,28 @@ export default function Navbar() {
 
                   {languageOpen ? (
                     <ChevronUp
-                      className="h-3.5 w-3.5 text-slate-500"
+                      className="
+                        h-3.5
+                        w-3.5
+                        text-slate-500
+                      "
                       strokeWidth={2}
                     />
                   ) : (
                     <ChevronDown
-                      className="h-3.5 w-3.5 text-slate-500"
+                      className="
+                        h-3.5
+                        w-3.5
+                        text-slate-500
+                      "
                       strokeWidth={2}
                     />
                   )}
                 </button>
 
-                {/* =================================================
+                {/* =============================================
                     LANGUAGE DROPDOWN
-                ================================================== */}
+                ============================================== */}
 
                 {languageOpen && (
                   <div
@@ -553,70 +643,114 @@ export default function Navbar() {
                     "
                   >
                     <div className="px-3 pb-2 pt-2">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-slate-400">
-                        {t("nav.selectLanguage")}
+                      <p
+                        className="
+                          text-[10px]
+                          font-extrabold
+                          uppercase
+                          tracking-[0.16em]
+                          text-slate-400
+                        "
+                      >
+                        {t(
+                          "nav.selectLanguage",
+                        )}
                       </p>
                     </div>
 
-                    {languages.map((item) => {
-                      const isActive =
-                        language === item.code;
+                    {languages.map(
+                      (item) => {
+                        const isActive =
+                          language ===
+                          item.code;
 
-                      return (
-                        <button
-                          key={item.code}
-                          type="button"
-                          onClick={() => {
-                            changeLanguage(
-                              item.code,
-                            );
-                            setLanguageOpen(false);
-                          }}
-                          className={`
-                            flex
-                            w-full
-                            items-center
-                            gap-3
-                            rounded-xl
-                            px-3
-                            py-2.5
-                            text-left
-                            transition-all
-                            duration-200
-                            ${
-                              isActive
-                                ? "bg-teal-50 text-teal-700"
-                                : "text-slate-700 hover:bg-slate-50 hover:text-teal-700"
+                        return (
+                          <button
+                            key={
+                              item.code
                             }
-                          `}
-                        >
-                          <span className="text-lg">
-                            {item.flag}
-                          </span>
+                            type="button"
+                            onClick={() => {
+                              changeLanguage(
+                                item.code,
+                              );
 
-                          <span className="flex-1">
-                            <span className="block text-sm font-bold">
-                              {item.nativeName}
+                              setLanguageOpen(
+                                false,
+                              );
+                            }}
+                            className={`
+                              flex
+                              w-full
+                              items-center
+                              gap-3
+                              rounded-xl
+                              px-3
+                              py-2.5
+                              text-left
+                              transition-all
+                              duration-200
+                              ${
+                                isActive
+                                  ? "bg-teal-50 text-teal-700"
+                                  : "text-slate-700 hover:bg-slate-50 hover:text-teal-700"
+                              }
+                            `}
+                          >
+                            <span className="text-lg">
+                              {item.flag}
                             </span>
 
-                            <span className="block text-[10px] font-medium uppercase tracking-wider text-slate-400">
-                              {t(item.name)}
-                            </span>
-                          </span>
+                            <span className="flex-1">
+                              <span
+                                className="
+                                  block
+                                  text-sm
+                                  font-bold
+                                "
+                              >
+                                {
+                                  item.nativeName
+                                }
+                              </span>
 
-                          {isActive && (
-                            <span className="h-2 w-2 rounded-full bg-teal-600" />
-                          )}
-                        </button>
-                      );
-                    })}
+                              <span
+                                className="
+                                  block
+                                  text-[10px]
+                                  font-medium
+                                  uppercase
+                                  tracking-wider
+                                  text-slate-400
+                                "
+                              >
+                                {t(
+                                  item.name,
+                                )}
+                              </span>
+                            </span>
+
+                            {isActive && (
+                              <span
+                                className="
+                                  h-2
+                                  w-2
+                                  rounded-full
+                                  bg-teal-600
+                                "
+                              />
+                            )}
+                          </button>
+                        );
+                      },
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* =================================================
+              {/* ===============================================
                   TALK TO OUR TEAM
-              ================================================== */}
+              ================================================ */}
 
               <Link
                 to="/contact"
@@ -640,12 +774,14 @@ export default function Navbar() {
                   lg:inline-flex
                 "
               >
-                {t("nav.talkToTeam")}
+                {t(
+                  "nav.talkToTeam",
+                )}
               </Link>
 
-              {/* =================================================
+              {/* ===============================================
                   MOBILE MENU BUTTON
-              ================================================== */}
+              ================================================ */}
 
               <button
                 type="button"
@@ -666,15 +802,21 @@ export default function Navbar() {
                   hover:text-teal-700
                   lg:hidden
                 "
-                onClick={() =>
-                  setMobileOpen((o) => !o)
-                }
+                onClick={() => {
+                  setLanguageOpen(false);
+                  setActiveMenu(null);
+                  setMobileOpen(
+                    (open) => !open,
+                  );
+                }}
                 aria-label={
                   mobileOpen
                     ? t("common.close")
                     : t("Open menu")
                 }
-                aria-expanded={mobileOpen}
+                aria-expanded={
+                  mobileOpen
+                }
                 aria-controls="mobile-menu"
               >
                 {mobileOpen ? (
@@ -686,16 +828,21 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-
-        {/* =====================================================
-            MOBILE MENU
-        ====================================================== */}
-
-        <MobileMenu
-          open={mobileOpen}
-          onClose={() => setMobileOpen(false)}
-        />
       </div>
+
+      {/* =====================================================
+          MOBILE MENU
+          
+          IMPORTANT:
+          MobileMenu is OUTSIDE the main navbar div.
+      ====================================================== */}
+
+      <MobileMenu
+        open={mobileOpen}
+        onClose={() =>
+          setMobileOpen(false)
+        }
+      />
     </header>
   );
 }

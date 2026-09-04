@@ -16,11 +16,14 @@ export default function MobileMenu({
   open,
   onClose,
 }) {
-const { t, tn } = useLanguage();
+  const {
+    t,
+    tn,
+    currentLanguage,
+  } = useLanguage();
+
   const [openTop, setOpenTop] = useState(null);
   const [openNested, setOpenNested] = useState(null);
-
-  
 
   useEffect(() => {
     if (!open) {
@@ -35,13 +38,13 @@ const { t, tn } = useLanguage();
     setOpenNested(null);
 
     setOpenTop((prev) =>
-      prev === key ? null : key,
+      prev === key ? null : key
     );
   }
 
   function toggleNested(idx) {
     setOpenNested((prev) =>
-      prev === idx ? null : idx,
+      prev === idx ? null : idx
     );
   }
 
@@ -99,7 +102,9 @@ const { t, tn } = useLanguage();
                 openTop === menu.key
               }
             >
-              <span>{tn(menu.label)}</span>
+              <span>
+                {tn(menu.label)}
+              </span>
 
               <ChevronDown
                 size={18}
@@ -124,8 +129,7 @@ const { t, tn } = useLanguage();
                   gap-0.5
                   pb-3
                   ${
-                    currentLanguage.dir ===
-                    "rtl"
+                    currentLanguage.dir === "rtl"
                       ? "pr-1"
                       : "pl-1"
                   }
@@ -190,8 +194,7 @@ const { t, tn } = useLanguage();
                               transition-transform
                               duration-200
                               ${
-                                openNested ===
-                                i
+                                openNested === i
                                   ? "rotate-180 text-teal-light"
                                   : "text-slate-muted"
                               }
@@ -219,9 +222,7 @@ const { t, tn } = useLanguage();
                                 <Link
                                   key={child.href}
                                   to={child.href}
-                                  onClick={
-                                    onClose
-                                  }
+                                  onClick={onClose}
                                   className="
                                     py-2
                                     text-sm
@@ -230,10 +231,10 @@ const { t, tn } = useLanguage();
                                   "
                                 >
                                   {tn(
-                                    child.label,
+                                    child.label
                                   )}
                                 </Link>
-                              ),
+                              )
                             )}
                           </div>
                         )}
@@ -253,7 +254,7 @@ const { t, tn } = useLanguage();
                       >
                         {tn(item.label)}
                       </Link>
-                    ),
+                    )
                 )}
               </div>
             )}
