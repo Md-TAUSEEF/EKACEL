@@ -19,6 +19,7 @@ import OrderSuccess from "../pages/OrderSuccess";
 import Dashboard from "../pages/Dashboard";
 import ProtectedRoute from "../components/ProtectedRoute";
 import AdminLogin from "../pages/AdminLogin";
+import LoadCalculator from "../pages/LoadCalculator";
 /* =========================================================
    PRODUCTS
 ========================================================= */
@@ -87,6 +88,8 @@ export default function AppRoutes() {
       {/* =====================================================
           ABOUT
       ====================================================== */}
+
+      <Route path="/load-calculator" element={<LoadCalculator />} />
 
       <Route path="/about" element={<About />} />
 

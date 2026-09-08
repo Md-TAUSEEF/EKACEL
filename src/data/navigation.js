@@ -60,7 +60,7 @@ export const primaryNav = [
   // =========================================================
   {
     key: "battery",
-    label: "Battery & Energy",
+    label: "Products & Solutions",
     href: "/products",
 
     items: [

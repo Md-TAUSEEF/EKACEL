@@ -533,7 +533,7 @@ export default function FAQ() {
           {/* CTA Button */}
 
           <a
-            href="#contact"
+            href="/contact"
             className="
               group
               relative
