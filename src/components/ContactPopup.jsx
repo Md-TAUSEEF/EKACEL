@@ -12,7 +12,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const STORAGE_KEY = "battery_contact_popup_shown";
+const LAST_SHOWN_KEY = "battery_contact_popup_last_shown";
+const POPUP_INTERVAL = 45000; // 45 seconds
 
 const ContactPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,41 +29,50 @@ const ContactPopup = () => {
   });
 
   // -----------------------------------------
-  // AUTO POPUP
+  // AUTO POPUP - EVERY 45 SECONDS
   // -----------------------------------------
   useEffect(() => {
-    // Don't show again during the same session
-    const alreadyShown = sessionStorage.getItem(STORAGE_KEY);
+    let timer;
 
-    if (alreadyShown) return;
+    const schedulePopup = () => {
+      const lastShown = sessionStorage.getItem(LAST_SHOWN_KEY);
+      const now = Date.now();
 
-    const timer = setTimeout(() => {
-      setIsOpen(true);
-      sessionStorage.setItem(STORAGE_KEY, "true");
-    }, 40000);
+      // First visit
+      if (!lastShown) {
+        timer = setTimeout(() => {
+          setIsOpen(true);
+          sessionStorage.setItem(
+            LAST_SHOWN_KEY,
+            Date.now().toString(),
+          );
+        }, POPUP_INTERVAL);
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  // -----------------------------------------
-  // EXIT INTENT - DESKTOP
-  // -----------------------------------------
-  useEffect(() => {
-    const alreadyShown = sessionStorage.getItem(STORAGE_KEY);
-
-    if (alreadyShown) return;
-
-    const handleMouseLeave = (event) => {
-      if (event.clientY <= 5) {
-        setIsOpen(true);
-        sessionStorage.setItem(STORAGE_KEY, "true");
+        return;
       }
+
+      // Calculate remaining time
+      const elapsed = now - Number(lastShown);
+      const remaining = Math.max(
+        POPUP_INTERVAL - elapsed,
+        0,
+      );
+
+      timer = setTimeout(() => {
+        setIsOpen(true);
+        sessionStorage.setItem(
+          LAST_SHOWN_KEY,
+          Date.now().toString(),
+        );
+      }, remaining);
     };
 
-    document.addEventListener("mouseleave", handleMouseLeave);
+    schedulePopup();
 
     return () => {
-      document.removeEventListener("mouseleave", handleMouseLeave);
+      if (timer) {
+        clearTimeout(timer);
+      }
     };
   }, []);
 
@@ -86,7 +96,6 @@ const ContactPopup = () => {
 
     console.log("Contact Form Data:", formData);
 
-    // Backend/API ko yahan connect kar sakte ho
     setSubmitted(true);
 
     setTimeout(() => {
@@ -107,8 +116,22 @@ const ContactPopup = () => {
     }, 2200);
   };
 
+  // -----------------------------------------
+  // CLOSE
+  // -----------------------------------------
   const closePopup = () => {
     setIsOpen(false);
+
+    /*
+      IMPORTANT:
+      Yahan timestamp update nahi karna hai.
+
+      Popup open hone ke time hi timestamp save
+      ho chuka hai.
+
+      Isliye popup close hone ke baad remaining
+      45-second cycle naturally continue karega.
+    */
   };
 
   return (
@@ -155,16 +178,19 @@ const ContactPopup = () => {
             </button>
 
             <div className="grid md:grid-cols-[0.85fr_1.15fr]">
-              {/* -------------------------------- */}
+
+              {/* ========================================= */}
               {/* LEFT SIDE */}
-              {/* -------------------------------- */}
+              {/* ========================================= */}
+
               <div className="relative hidden overflow-hidden bg-emerald-700 p-8 text-white md:block lg:p-10">
-                {/* Background decoration */}
+
                 <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-white/10" />
 
                 <div className="absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-white/10" />
 
                 <div className="relative z-10 flex h-full flex-col justify-between">
+
                   <div>
                     <div className="mb-7 flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
                       <MessageSquare size={25} />
@@ -185,6 +211,7 @@ const ContactPopup = () => {
                   </div>
 
                   <div className="mt-10 space-y-4">
+
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
                         <CheckCircle2 size={18} />
@@ -214,23 +241,30 @@ const ContactPopup = () => {
                         Fast response from our team
                       </span>
                     </div>
+
                   </div>
                 </div>
               </div>
 
-              {/* -------------------------------- */}
+              {/* ========================================= */}
               {/* RIGHT SIDE */}
-              {/* -------------------------------- */}
+              {/* ========================================= */}
+
               <div className="max-h-[90vh] overflow-y-auto p-6 sm:p-8 lg:p-10">
+
                 <AnimatePresence mode="wait">
+
                   {!submitted ? (
+
                     <motion.div
                       key="form"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                     >
+
                       <div className="mb-7 pr-8">
+
                         <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-600">
                           Get In Touch
                         </p>
@@ -242,14 +276,17 @@ const ContactPopup = () => {
                         <p className="mt-2 text-sm leading-6 text-gray-500">
                           Share your requirement and we'll get back to you.
                         </p>
+
                       </div>
 
                       <form
                         onSubmit={handleSubmit}
                         className="space-y-4"
                       >
+
                         {/* NAME + COMPANY */}
                         <div className="grid gap-4 sm:grid-cols-2">
+
                           {/* NAME */}
                           <div>
                             <label className="mb-1.5 block text-sm font-semibold text-gray-700">
@@ -258,6 +295,7 @@ const ContactPopup = () => {
                             </label>
 
                             <div className="relative">
+
                               <User
                                 size={17}
                                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -272,16 +310,19 @@ const ContactPopup = () => {
                                 placeholder="Your name"
                                 className="h-11 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/10"
                               />
+
                             </div>
                           </div>
 
                           {/* COMPANY */}
                           <div>
+
                             <label className="mb-1.5 block text-sm font-semibold text-gray-700">
                               Company
                             </label>
 
                             <div className="relative">
+
                               <Building2
                                 size={17}
                                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -295,20 +336,25 @@ const ContactPopup = () => {
                                 placeholder="Company name"
                                 className="h-11 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/10"
                               />
+
                             </div>
                           </div>
+
                         </div>
 
                         {/* EMAIL + PHONE */}
                         <div className="grid gap-4 sm:grid-cols-2">
+
                           {/* EMAIL */}
                           <div>
+
                             <label className="mb-1.5 block text-sm font-semibold text-gray-700">
                               Email
                               <span className="text-red-500"> *</span>
                             </label>
 
                             <div className="relative">
+
                               <Mail
                                 size={17}
                                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -323,17 +369,20 @@ const ContactPopup = () => {
                                 placeholder="you@company.com"
                                 className="h-11 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/10"
                               />
+
                             </div>
                           </div>
 
                           {/* PHONE */}
                           <div>
+
                             <label className="mb-1.5 block text-sm font-semibold text-gray-700">
                               Phone / WhatsApp
                               <span className="text-red-500"> *</span>
                             </label>
 
                             <div className="relative">
+
                               <Phone
                                 size={17}
                                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -348,17 +397,21 @@ const ContactPopup = () => {
                                 placeholder="+91 98765 43210"
                                 className="h-11 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/10"
                               />
+
                             </div>
                           </div>
+
                         </div>
 
                         {/* COUNTRY */}
                         <div>
+
                           <label className="mb-1.5 block text-sm font-semibold text-gray-700">
                             Country
                           </label>
 
                           <div className="relative">
+
                             <Globe2
                               size={17}
                               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -372,17 +425,20 @@ const ContactPopup = () => {
                               placeholder="India"
                               className="h-11 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/10"
                             />
+
                           </div>
                         </div>
 
                         {/* REQUIREMENT */}
                         <div>
+
                           <label className="mb-1.5 block text-sm font-semibold text-gray-700">
                             Your Requirement
                             <span className="text-red-500"> *</span>
                           </label>
 
                           <div className="relative">
+
                             <MessageSquare
                               size={17}
                               className="absolute left-3 top-3 text-gray-400"
@@ -397,6 +453,7 @@ const ContactPopup = () => {
                               placeholder="Tell us about your battery / energy requirement..."
                               className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 py-3 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/10"
                             />
+
                           </div>
                         </div>
 
@@ -417,9 +474,12 @@ const ContactPopup = () => {
                           By submitting this form, you agree to be contacted
                           regarding your enquiry.
                         </p>
+
                       </form>
                     </motion.div>
+
                   ) : (
+
                     <motion.div
                       key="success"
                       initial={{
@@ -432,11 +492,14 @@ const ContactPopup = () => {
                       }}
                       className="flex min-h-[430px] flex-col items-center justify-center text-center"
                     >
+
                       <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+
                         <CheckCircle2
                           size={34}
                           className="text-emerald-600"
                         />
+
                       </div>
 
                       <h3 className="text-2xl font-bold text-gray-900">
@@ -447,9 +510,13 @@ const ContactPopup = () => {
                         Your enquiry has been received successfully. Our team
                         will get in touch with you shortly.
                       </p>
+
                     </motion.div>
+
                   )}
+
                 </AnimatePresence>
+
               </div>
             </div>
           </motion.div>
